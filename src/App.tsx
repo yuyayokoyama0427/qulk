@@ -60,11 +60,12 @@ export default function App() {
             ) : (
               <div className="flex items-center gap-2">
                 <a
-                  href="#"
+                  href="https://yomiyasu.lemonsqueezy.com/checkout/buy/9249d747-f788-4aaf-b672-3f157b96021c"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1.5 rounded-full transition"
-                  onClick={e => e.preventDefault()}
                 >
-                  Pro版を購入
+                  Pro版を購入（1,980円）
                 </a>
                 <button
                   className="text-xs text-blue-600 hover:underline"
