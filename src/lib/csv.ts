@@ -1,4 +1,5 @@
 import Papa from 'papaparse'
+import Encoding from 'encoding-japanese'
 import type { QRItem } from './generator'
 
 export interface ParseResult {
@@ -6,60 +7,64 @@ export interface ParseResult {
   errors: string[]
 }
 
+function processRows(rows: Record<string, string>[]): { items: QRItem[]; errors: string[] } {
+  const errors: string[] = []
+  const items: QRItem[] = []
+
+  const nameKeys = ['name', '名前', '名称', 'title', 'タイトル', '商品名']
+  const urlKeys = ['url', 'URL', 'link', 'リンク', 'アドレス']
+
+  if (rows.length === 0) {
+    errors.push('CSVにデータがありません')
+    return { items, errors }
+  }
+
+  const firstRow = rows[0]
+  const headers = Object.keys(firstRow)
+
+  const nameKey = headers.find(h => nameKeys.includes(h.trim())) ?? headers[0]
+  const urlKey = headers.find(h => urlKeys.includes(h.trim())) ?? headers[1]
+
+  if (!nameKey || !urlKey) {
+    errors.push('CSVに「name」と「url」列が必要です')
+    return { items, errors }
+  }
+
+  rows.forEach((row, i) => {
+    const name = row[nameKey]?.trim()
+    const url = row[urlKey]?.trim()
+
+    if (!name) {
+      errors.push(`${i + 2}行目：名前が空です`)
+      return
+    }
+    if (!url || !url.startsWith('http')) {
+      errors.push(`${i + 2}行目「${name}」：URLが無効です`)
+      return
+    }
+    items.push({ name, url })
+  })
+
+  return { items, errors }
+}
+
 export function parseCSV(file: File): Promise<ParseResult> {
   return new Promise((resolve) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const errors: string[] = []
-        const items: QRItem[] = []
-
-        const rows = results.data as Record<string, string>[]
-
-        // カラム名の自動検出（name/url or 名前/URL など）
-        const nameKeys = ['name', '名前', '名称', 'title', 'タイトル', '商品名']
-        const urlKeys = ['url', 'URL', 'link', 'リンク', 'アドレス']
-
-        if (rows.length === 0) {
-          errors.push('CSVにデータがありません')
-          resolve({ items, errors })
-          return
-        }
-
-        const firstRow = rows[0]
-        const headers = Object.keys(firstRow)
-
-        const nameKey = headers.find(h => nameKeys.includes(h.trim())) ?? headers[0]
-        const urlKey = headers.find(h => urlKeys.includes(h.trim())) ?? headers[1]
-
-        if (!nameKey || !urlKey) {
-          errors.push('CSVに「name」と「url」列が必要です')
-          resolve({ items, errors })
-          return
-        }
-
-        rows.forEach((row, i) => {
-          const name = row[nameKey]?.trim()
-          const url = row[urlKey]?.trim()
-
-          if (!name) {
-            errors.push(`${i + 2}行目：名前が空です`)
-            return
-          }
-          if (!url || !url.startsWith('http')) {
-            errors.push(`${i + 2}行目「${name}」：URLが無効です`)
-            return
-          }
-          items.push({ name, url })
-        })
-
-        resolve({ items, errors })
-      },
-      error: (err) => {
-        resolve({ items: [], errors: [err.message] })
-      },
-    })
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const buffer = e.target?.result as ArrayBuffer
+      const uint8 = new Uint8Array(buffer)
+      const detected = Encoding.detect(uint8)
+      const encoding = detected === 'SJIS' ? 'Shift_JIS' : 'UTF-8'
+      const text = new TextDecoder(encoding).decode(uint8)
+      const result = Papa.parse<Record<string, string>>(text, {
+        header: true,
+        skipEmptyLines: true,
+      })
+      resolve(processRows(result.data))
+    }
+    reader.onerror = () => resolve({ items: [], errors: ['ファイルの読み込みに失敗しました'] })
+    reader.readAsArrayBuffer(file)
   })
 }
 

@@ -37,7 +37,7 @@ export function CSVUploader({ onParsed }: Props) {
       >
         <div className="text-4xl mb-3">📄</div>
         <div className="text-sm font-medium text-gray-700">CSVファイルをドロップ または クリックして選択</div>
-        <div className="text-xs text-gray-400 mt-1">columns: name, url</div>
+        <div className="text-xs text-gray-400 mt-1">UTF-8・Shift_JIS（Excel）自動対応</div>
         <input
           ref={inputRef}
           type="file"
