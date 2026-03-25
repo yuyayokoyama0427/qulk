@@ -3,7 +3,8 @@ import './index.css'
 import { CSVUploader } from './components/CSVUploader'
 import { QRSettingsPanel } from './components/QRSettings'
 import { ItemList } from './components/ItemList'
-import { bulkGenerateZip, DEFAULT_SETTINGS, type QRItem, type QRSettings } from './lib/generator'
+import { bulkGenerateZip, generateQRSVG, DEFAULT_SETTINGS, type QRItem, type QRSettings } from './lib/generator'
+import JSZip from 'jszip'
 import { isProFromStorage, validateLicense, getFreeLimit } from './lib/license'
 
 export default function App() {
@@ -27,6 +28,25 @@ export default function App() {
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
     a.download = `qulk_${Date.now()}.zip`
+    a.click()
+    setProgress(null)
+  }
+
+  async function handleGenerateSVG() {
+    if (targetItems.length === 0) return
+    setProgress({ done: 0, total: targetItems.length })
+    const zip = new JSZip()
+    for (let i = 0; i < targetItems.length; i++) {
+      const item = targetItems[i]
+      const svg = await generateQRSVG(item.url, settings)
+      const filename = `${String(i + 1).padStart(3, '0')}_${item.name.replace(/[/\\?%*:|"<>]/g, '_')}.svg`
+      zip.file(filename, svg)
+      setProgress({ done: i + 1, total: targetItems.length })
+    }
+    const blob = await zip.generateAsync({ type: 'blob' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `qulk_svg_${Date.now()}.zip`
     a.click()
     setProgress(null)
   }
@@ -137,12 +157,21 @@ export default function App() {
                   </div>
                 </div>
               ) : (
-                <button
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition text-sm"
-                  onClick={handleGenerate}
-                >
-                  ZIPで一括ダウンロード
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition text-sm"
+                    onClick={handleGenerate}
+                  >
+                    PNG一括ダウンロード
+                  </button>
+                  <button
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition text-sm"
+                    onClick={handleGenerateSVG}
+                    title="印刷・拡大縮小に最適なベクター形式"
+                  >
+                    SVG一括ダウンロード
+                  </button>
+                </div>
               )}
             </div>
           </>

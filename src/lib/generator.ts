@@ -71,6 +71,32 @@ export async function generateQRWithLogo(
   })
 }
 
+export async function generateQRSVG(
+  url: string,
+  settings: QRSettings
+): Promise<string> {
+  return QRCode.toString(url, {
+    type: 'svg',
+    width: settings.size,
+    color: {
+      dark: settings.color,
+      light: settings.background,
+    },
+    errorCorrectionLevel: settings.errorCorrection,
+    margin: 2,
+  })
+}
+
+export function downloadSVG(svgString: string, filename: string): void {
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export async function bulkGenerateZip(
   items: QRItem[],
   settings: QRSettings,
