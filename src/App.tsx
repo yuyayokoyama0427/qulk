@@ -12,6 +12,7 @@ export default function App() {
   const [settings, setSettings] = useState<QRSettings>(DEFAULT_SETTINGS)
   const [isPro, setIsPro] = useState(isProFromStorage)
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
   const [showLicenseInput, setShowLicenseInput] = useState(false)
   const [licenseKey, setLicenseKey] = useState('')
   const [licenseError, setLicenseError] = useState<string | null>(null)
@@ -30,6 +31,8 @@ export default function App() {
     a.download = `qulk_${Date.now()}.zip`
     a.click()
     setProgress(null)
+    setToast(`${targetItems.length}件のQRコード（PNG）を生成しました！`)
+    setTimeout(() => setToast(null), 3000)
   }
 
   async function handleGenerateSVG() {
@@ -49,6 +52,8 @@ export default function App() {
     a.download = `qulk_svg_${Date.now()}.zip`
     a.click()
     setProgress(null)
+    setToast(`${targetItems.length}件のQRコード（SVG）を生成しました！`)
+    setTimeout(() => setToast(null), 3000)
   }
 
   async function handleActivate() {
@@ -193,6 +198,12 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-5 py-3 rounded-xl shadow-lg z-50 animate-fade-in">
+          ✅ {toast}
+        </div>
+      )}
 
       <footer className="text-center text-xs text-gray-400 py-8">
         © 2026 Qulk · 無料：最大{getFreeLimit()}件 / Pro版：無制限
