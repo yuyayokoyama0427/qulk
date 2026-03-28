@@ -20,7 +20,7 @@ export function QRSettingsPanel({ settings, onChange, isPro }: Props) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
-      <h3 className="text-sm font-semibold text-gray-700">QR設定</h3>
+      <h3 className="text-sm font-semibold text-gray-700">② QR設定（任意）</h3>
 
       <div className="grid grid-cols-2 gap-4">
         <div>

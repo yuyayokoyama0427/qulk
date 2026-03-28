@@ -5,8 +5,11 @@ export function getFreeLimit(): number {
   return FREE_LIMIT
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export function isProFromStorage(): boolean {
-  return !!localStorage.getItem(STORAGE_KEY)
+  const key = localStorage.getItem(STORAGE_KEY)
+  return key !== null && UUID_REGEX.test(key)
 }
 
 export async function validateLicense(key: string): Promise<boolean> {

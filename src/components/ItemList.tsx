@@ -5,9 +5,10 @@ interface Props {
   items: QRItem[]
   isPro: boolean
   onClear: () => void
+  onProClick: () => void
 }
 
-export function ItemList({ items, isPro, onClear }: Props) {
+export function ItemList({ items, isPro, onClear, onProClick }: Props) {
   const limit = getFreeLimit()
   const visibleItems = isPro ? items : items.slice(0, limit)
   const hiddenCount = items.length - visibleItems.length
@@ -37,8 +38,14 @@ export function ItemList({ items, isPro, onClear }: Props) {
       </div>
 
       {hiddenCount > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-700">
-          🔒 残り{hiddenCount}件はPro版で生成できます
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 space-y-2">
+          <p className="text-sm text-amber-700">🔒 残り{hiddenCount}件はPro版で生成できます</p>
+          <button
+            onClick={onProClick}
+            className="w-full bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold py-1.5 rounded-lg transition-colors"
+          >
+            Pro版を購入する（1,980円）
+          </button>
         </div>
       )}
     </div>

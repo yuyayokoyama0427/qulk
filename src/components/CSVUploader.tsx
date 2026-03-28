@@ -10,8 +10,10 @@ export function CSVUploader({ onParsed }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [errors, setErrors] = useState<string[]>([])
   const [isDragging, setIsDragging] = useState(false)
+  const [fileName, setFileName] = useState('')
 
   async function handleFile(file: File) {
+    setFileName(file.name)
     const result = await parseCSV(file)
     setErrors(result.errors)
     if (result.items.length > 0) onParsed(result.items)
@@ -36,7 +38,11 @@ export function CSVUploader({ onParsed }: Props) {
         onDragLeave={() => setIsDragging(false)}
       >
         <div className="text-4xl mb-3">📄</div>
-        <div className="text-sm font-medium text-gray-700">CSVファイルをドロップ または クリックして選択</div>
+        {fileName ? (
+          <div className="text-sm font-medium text-blue-700">📎 {fileName}</div>
+        ) : (
+          <div className="text-sm font-medium text-gray-700">CSVファイルをドロップ または クリックして選択</div>
+        )}
         <div className="text-xs text-gray-400 mt-1">UTF-8・Shift_JIS（Excel）自動対応</div>
         <input
           ref={inputRef}

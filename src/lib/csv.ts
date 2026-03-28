@@ -38,7 +38,17 @@ function processRows(rows: Record<string, string>[]): { items: QRItem[]; errors:
       errors.push(`${i + 2}行目：名前が空です`)
       return
     }
-    if (!url || !url.startsWith('http')) {
+    if (!url) {
+      errors.push(`${i + 2}行目「${name}」：URLが空です`)
+      return
+    }
+    try {
+      const parsed = new URL(url)
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        errors.push(`${i + 2}行目「${name}」：URLが無効です（http/httpsのみ対応）`)
+        return
+      }
+    } catch {
       errors.push(`${i + 2}行目「${name}」：URLが無効です`)
       return
     }
@@ -77,7 +87,9 @@ Instagram,https://instagram.com/example
 `
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
   const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
+  const url = URL.createObjectURL(blob)
+  a.href = url
   a.download = 'qulk_sample.csv'
   a.click()
+  URL.revokeObjectURL(url)
 }

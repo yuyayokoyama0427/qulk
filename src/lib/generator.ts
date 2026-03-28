@@ -75,7 +75,7 @@ export async function generateQRSVG(
   url: string,
   settings: QRSettings
 ): Promise<string> {
-  return QRCode.toString(url, {
+  const svgString = await QRCode.toString(url, {
     type: 'svg',
     width: settings.size,
     color: {
@@ -85,6 +85,23 @@ export async function generateQRSVG(
     errorCorrectionLevel: settings.errorCorrection,
     margin: 2,
   })
+
+  if (!settings.logo) return svgString
+
+  // SVGのviewBox座標系（モジュール数ベース）を取得してロゴ座標を計算する
+  const viewBoxMatch = svgString.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/)
+  const svgCoordSize = viewBoxMatch ? parseFloat(viewBoxMatch[1]) : settings.size
+
+  const logoSize = svgCoordSize * 0.22
+  const logoX = (svgCoordSize - logoSize) / 2
+  const logoY = (svgCoordSize - logoSize) / 2
+  const pad = svgCoordSize * 0.013 // settings.size基準の4pxをviewBox座標系にスケール
+
+  const logoElements = `
+  <rect x="${logoX - pad}" y="${logoY - pad}" width="${logoSize + pad * 2}" height="${logoSize + pad * 2}" fill="#ffffff"/>
+  <image href="${settings.logo}" x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}"/>
+`
+  return svgString.replace('</svg>', `${logoElements}</svg>`)
 }
 
 export function downloadSVG(svgString: string, filename: string): void {

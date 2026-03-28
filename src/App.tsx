@@ -27,9 +27,11 @@ export default function App() {
       setProgress({ done, total })
     })
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
+    const url = URL.createObjectURL(blob)
+    a.href = url
     a.download = `qulk_${Date.now()}.zip`
     a.click()
+    URL.revokeObjectURL(url)
     setProgress(null)
     setToast(`${targetItems.length}件のQRコード（PNG）を生成しました！`)
     setTimeout(() => setToast(null), 3000)
@@ -48,9 +50,11 @@ export default function App() {
     }
     const blob = await zip.generateAsync({ type: 'blob' })
     const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
+    const svgUrl = URL.createObjectURL(blob)
+    a.href = svgUrl
     a.download = `qulk_svg_${Date.now()}.zip`
     a.click()
+    URL.revokeObjectURL(svgUrl)
     setProgress(null)
     setToast(`${targetItems.length}件のQRコード（SVG）を生成しました！`)
     setTimeout(() => setToast(null), 3000)
@@ -140,7 +144,7 @@ export default function App() {
 
         {items.length > 0 && (
           <>
-            <ItemList items={items} isPro={isPro} onClear={() => setItems([])} />
+            <ItemList items={items} isPro={isPro} onClear={() => setItems([])} onProClick={() => window.open('https://yomiyasu.lemonsqueezy.com/checkout/buy/9249d747-f788-4aaf-b672-3f157b96021c', '_blank')} />
             <QRSettingsPanel settings={settings} onChange={setSettings} isPro={isPro} />
 
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
@@ -205,8 +209,12 @@ export default function App() {
         </div>
       )}
 
-      <footer className="text-center text-xs text-gray-400 py-8">
-        © 2026 Qulk · 無料：最大{getFreeLimit()}件 / Pro版：無制限
+      <footer className="text-center text-xs text-gray-400 py-8 space-y-2">
+        <div className="flex justify-center gap-4">
+          <a href="/privacy" className="hover:text-gray-600 underline">プライバシーポリシー</a>
+          <a href="/terms" className="hover:text-gray-600 underline">利用規約</a>
+        </div>
+        <div>© 2026 Qulk · 無料：最大{getFreeLimit()}件 / Pro版：無制限</div>
       </footer>
     </div>
   )
