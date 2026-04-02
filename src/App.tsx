@@ -204,8 +204,18 @@ export default function App() {
       </main>
 
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-5 py-3 rounded-xl shadow-lg z-50 animate-fade-in">
-          ✅ {toast}
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-5 py-3 rounded-xl shadow-lg z-50 animate-fade-in text-center">
+          <div>✅ {toast}</div>
+          {!isPro && (
+            <a
+              href="https://yomiyasu.lemonsqueezy.com/checkout/buy/9249d747-f788-4aaf-b672-3f157b96021c"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-300 hover:text-blue-200 underline mt-1 block"
+            >
+              Pro版（1,980円）なら次回から無制限で →
+            </a>
+          )}
         </div>
       )}
 
